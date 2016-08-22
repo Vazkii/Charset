@@ -61,7 +61,7 @@ public class ModCharsetGates {
 
 	@SidedProxy(clientSide = "pl.asie.charset.gates.ProxyClient", serverSide = "pl.asie.charset.gates.ProxyCommon")
 	public static ProxyCommon proxy;
-	@Instance
+	@Mod.Instance(MODID)
 	public static ModCharsetGates INSTANCE;
 
 	public static PacketRegistry packet;
