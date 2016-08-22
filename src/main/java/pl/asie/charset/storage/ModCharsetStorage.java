@@ -109,7 +109,7 @@ public class ModCharsetStorage {
 	public static BlockCrate crateBlock;
 	public static ItemBlock crateItem;
 
-	public static boolean renderBarrelText, renderBarrelItem, renderBarrelItem3D;
+	public static boolean barrelsEnabled, renderBarrelText, renderBarrelItem, renderBarrelItem3D;
 
 	private Configuration config;
 
@@ -132,6 +132,8 @@ public class ModCharsetStorage {
 		logger = LogManager.getLogger(ModCharsetStorage.MODID);
 		config = new Configuration(ModCharsetLib.instance.getConfigFile("storage.cfg"));
 
+		barrelsEnabled = config.getBoolean("barrelsEnabled", "barrels", true, "");
+		
 		backpackBlock = new BlockBackpack();
 		GameRegistry.register(backpackBlock.setRegistryName("backpack"));
 		GameRegistry.register(new ItemBackpack(backpackBlock).setRegistryName("backpack"));
@@ -148,14 +150,17 @@ public class ModCharsetStorage {
 			initMultiplePants();
 		}
 
-		barrelBlock = new BlockBarrel();
-		barrelItem = new ItemDayBarrel(barrelBlock);
-		barrelCartItem = new ItemMinecartDayBarrel();
-		GameRegistry.register(barrelBlock.setRegistryName("barrel"));
-		GameRegistry.register(barrelItem.setRegistryName("barrel"));
-		GameRegistry.register(barrelCartItem.setRegistryName("barrelCart"));
+		if(barrelsEnabled) {
+			barrelBlock = new BlockBarrel();
+			barrelItem = new ItemDayBarrel(barrelBlock);
+			barrelCartItem = new ItemMinecartDayBarrel();
+			GameRegistry.register(barrelBlock.setRegistryName("barrel"));
+			
+			GameRegistry.register(barrelItem.setRegistryName("barrel"));
+			GameRegistry.register(barrelCartItem.setRegistryName("barrelCart"));
 
-		MinecraftForge.EVENT_BUS.register(new BarrelEventListener());
+			MinecraftForge.EVENT_BUS.register(new BarrelEventListener());
+		}
 
 		masterKeyItem = new ItemMasterKey();
 		GameRegistry.register(masterKeyItem.setRegistryName("masterKey"));
@@ -166,8 +171,11 @@ public class ModCharsetStorage {
 		lockItem = new ItemLock();
 		GameRegistry.register(lockItem.setRegistryName("lock"));
 
-		ModCharsetLib.proxy.registerItemModel(barrelItem, 0, "charsetstorage:barrel");
-		ModCharsetLib.proxy.registerItemModel(barrelCartItem, 0, "charsetstorage:barrelCart");
+		if(barrelsEnabled) {
+			ModCharsetLib.proxy.registerItemModel(barrelItem, 0, "charsetstorage:barrel");
+			ModCharsetLib.proxy.registerItemModel(barrelCartItem, 0, "charsetstorage:barrelCart");
+		}
+
 		ModCharsetLib.proxy.registerItemModel(backpackBlock, 0, "charsetstorage:backpack");
 		ModCharsetLib.proxy.registerItemModel(masterKeyItem, 0, "charsetstorage:masterKey");
 		ModCharsetLib.proxy.registerItemModel(keyItem, 0, "charsetstorage:key");
@@ -181,7 +189,7 @@ public class ModCharsetStorage {
 		renderBarrelItem3D = config.getBoolean("renderItem3D", "barrels", false, "Should items use fancy 3D rendering?");
 		renderBarrelItem = config.getBoolean("renderItem", "barrels", true, "Should items be rendered on barrels?");
 		renderBarrelText = config.getBoolean("renderText", "barrels", true, "Should text be rendered on barrels?");
-
+		
 		config.save();
 
 		proxy.preInit();
@@ -191,15 +199,18 @@ public class ModCharsetStorage {
 	public void init(FMLInitializationEvent event) {
 		if(!ModCharsetLib.moduleEnabled(ModCharsetLib.MODULE_STORAGE))
 			return;
+
+		if(barrelsEnabled)
+			GameRegistry.registerTileEntity(TileEntityDayBarrel.class, "charset:barrel");
 		
 		GameRegistry.registerTileEntity(TileBackpack.class, "charset:backpack");
-		GameRegistry.registerTileEntity(TileEntityDayBarrel.class, "charset:barrel");
 		if (ModCharsetLib.INDEV) {
 			GameRegistry.registerTileEntity(TileEntityCrate.class, "charset:crate");
 		}
 
 		EntityRegistry.registerModEntity(EntityLock.class, "charsetstorage:lock", 1, this, 64, 3, true);
-		EntityRegistry.registerModEntity(EntityMinecartDayBarrel.class, "charsetstorage:barrelCart", 2, this, 64, 1, true);
+		if(barrelsEnabled)
+			EntityRegistry.registerModEntity(EntityMinecartDayBarrel.class, "charsetstorage:barrelCart", 2, this, 64, 1, true);
 
 		proxy.init();
 
@@ -219,11 +230,13 @@ public class ModCharsetStorage {
 			});
 		}
 
-		GameRegistry.addRecipe(new BarrelCartRecipe());
-		BarrelUpgradeRecipes.addUpgradeRecipes();
+		if(barrelsEnabled) {
+			GameRegistry.addRecipe(new BarrelCartRecipe());
+			BarrelUpgradeRecipes.addUpgradeRecipes();
 
-		RecipeSorter.register("charsetstorage:barrelCart", BarrelCartRecipe.class, RecipeSorter.Category.SHAPELESS, "");
-
+			RecipeSorter.register("charsetstorage:barrelCart", BarrelCartRecipe.class, RecipeSorter.Category.SHAPELESS, "");
+		}
+		
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(backpackBlock), "lgl", "scs", "lwl",
 				'l', Items.LEATHER, 'c', "chestWood", 's', "stickWood", 'g', "ingotGold", 'w', Blocks.WOOL));
 
@@ -328,16 +341,18 @@ public class ModCharsetStorage {
 		if(!ModCharsetLib.moduleEnabled(ModCharsetLib.MODULE_STORAGE))
 			return;
 		
-		BarrelRegistry.INSTANCE.register(TileEntityDayBarrel.Type.CREATIVE, new ItemStack(Blocks.BEDROCK), new ItemStack(Blocks.DIAMOND_BLOCK));
-		barrelCartItem.setMaxStackSize(new ItemStack(Items.CHEST_MINECART).getMaxStackSize()); // Railcraft compat
+		if(barrelsEnabled) {
+			BarrelRegistry.INSTANCE.register(TileEntityDayBarrel.Type.CREATIVE, new ItemStack(Blocks.BEDROCK), new ItemStack(Blocks.DIAMOND_BLOCK));
+			barrelCartItem.setMaxStackSize(new ItemStack(Items.CHEST_MINECART).getMaxStackSize()); // Railcraft compat
 
-		// If you stop this from happening in postInit, please adjust TextureStitchEvent in ProxyClient
-		BarrelRegistry.INSTANCE.registerCraftable(new ItemStack(Blocks.LOG, 1, 0), new ItemStack(Blocks.WOODEN_SLAB, 1, 0));
-		BarrelRegistry.INSTANCE.registerCraftable(new ItemStack(Blocks.LOG, 1, 1), new ItemStack(Blocks.WOODEN_SLAB, 1, 1));
-		BarrelRegistry.INSTANCE.registerCraftable(new ItemStack(Blocks.LOG, 1, 2), new ItemStack(Blocks.WOODEN_SLAB, 1, 2));
-		BarrelRegistry.INSTANCE.registerCraftable(new ItemStack(Blocks.LOG, 1, 3), new ItemStack(Blocks.WOODEN_SLAB, 1, 3));
-		BarrelRegistry.INSTANCE.registerCraftable(new ItemStack(Blocks.LOG2, 1, 0), new ItemStack(Blocks.WOODEN_SLAB, 1, 4));
-		BarrelRegistry.INSTANCE.registerCraftable(new ItemStack(Blocks.LOG2, 1, 1), new ItemStack(Blocks.WOODEN_SLAB, 1, 5));
+			// If you stop this from happening in postInit, please adjust TextureStitchEvent in ProxyClient
+			BarrelRegistry.INSTANCE.registerCraftable(new ItemStack(Blocks.LOG, 1, 0), new ItemStack(Blocks.WOODEN_SLAB, 1, 0));
+			BarrelRegistry.INSTANCE.registerCraftable(new ItemStack(Blocks.LOG, 1, 1), new ItemStack(Blocks.WOODEN_SLAB, 1, 1));
+			BarrelRegistry.INSTANCE.registerCraftable(new ItemStack(Blocks.LOG, 1, 2), new ItemStack(Blocks.WOODEN_SLAB, 1, 2));
+			BarrelRegistry.INSTANCE.registerCraftable(new ItemStack(Blocks.LOG, 1, 3), new ItemStack(Blocks.WOODEN_SLAB, 1, 3));
+			BarrelRegistry.INSTANCE.registerCraftable(new ItemStack(Blocks.LOG2, 1, 0), new ItemStack(Blocks.WOODEN_SLAB, 1, 4));
+			BarrelRegistry.INSTANCE.registerCraftable(new ItemStack(Blocks.LOG2, 1, 1), new ItemStack(Blocks.WOODEN_SLAB, 1, 5));
+		}
 
 		if (ModCharsetLib.INDEV) {
 			for (int i = 0; i < 6; i++) {

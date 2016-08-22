@@ -22,6 +22,7 @@ import net.minecraft.item.ItemStack;
 
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
@@ -56,10 +57,22 @@ public class ModCharsetWires {
 
 	public static WireFactory[] wireFactories = new WireFactory[18];
 
+	private Configuration config;
+	
+	private boolean addWireRecipe;
+	private boolean addInsulatedWireRecipe;
+	private boolean addBundledWireRecipe;
+	
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
-		if(!ModCharsetLib.moduleEnabled(ModCharsetLib.MODULE_TWEAKS))
+		if(!ModCharsetLib.moduleEnabled(ModCharsetLib.MODULE_WIRES))
 			return;
+		
+		config = new Configuration(ModCharsetLib.instance.getConfigFile("wires.cfg"));
+		addWireRecipe = config.getBoolean("enableWireRecipe", "recipes", true, "");
+		addInsulatedWireRecipe = config.getBoolean("enableInsulatedWireRecipe", "recipes", true, "");
+		addBundledWireRecipe = config.getBoolean("enabledBundledWireRecipe", "recipes", true, "");
+		config.save();
 		
 		wireFactories[0] = new WireSignalFactory(WireType.NORMAL, -1).setRegistryName(new ResourceLocation("charsetwires:rsWireN"));
 		for (int i = 0; i < 16; i++) {
@@ -78,30 +91,34 @@ public class ModCharsetWires {
 
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
-		if(!ModCharsetLib.moduleEnabled(ModCharsetLib.MODULE_TWEAKS))
+		if(!ModCharsetLib.moduleEnabled(ModCharsetLib.MODULE_WIRES))
 			return;
 		
 		packet = new PacketRegistry(ModCharsetWires.MODID);
 
 		// Temporary recipes
-		GameRegistry.addRecipe(RecipeCharset.Builder.create(new RecipeResultWire(wireFactories[0], false, 8))
-				.shaped(" r ", "rir", " r ", 'r', "dustRedstone", 'i', "ingotIron")
-				.build());
-
-		for (int i = 0; i < 16; i++) {
-			GameRegistry.addRecipe(RecipeCharset.Builder.create(new RecipeResultWire(wireFactories[i + 1], false, 8))
-					.shaped("ddd", "dwd", "ddd", 'd', new RecipeObjectWire(wireFactories[0], false), 'w', new ItemStack(Blocks.WOOL, 1, i))
+		if(addWireRecipe)
+			GameRegistry.addRecipe(RecipeCharset.Builder.create(new RecipeResultWire(wireFactories[0], false, 8))
+					.shaped(" r ", "rir", " r ", 'r', "dustRedstone", 'i', "ingotIron")
 					.build());
-			GameRegistry.addRecipe(RecipeCharset.Builder.create(new RecipeResultWire(wireFactories[i + 1], true, 8))
-					.shaped("ddd", "dwd", "ddd", 'd', new RecipeObjectWire(wireFactories[0], true), 'w', new ItemStack(Blocks.WOOL, 1, i))
+
+		if(addInsulatedWireRecipe)
+			for (int i = 0; i < 16; i++) {
+				GameRegistry.addRecipe(RecipeCharset.Builder.create(new RecipeResultWire(wireFactories[i + 1], false, 8))
+						.shaped("ddd", "dwd", "ddd", 'd', new RecipeObjectWire(wireFactories[0], false), 'w', new ItemStack(Blocks.WOOL, 1, i))
+						.build());
+				GameRegistry.addRecipe(RecipeCharset.Builder.create(new RecipeResultWire(wireFactories[i + 1], true, 8))
+						.shaped("ddd", "dwd", "ddd", 'd', new RecipeObjectWire(wireFactories[0], true), 'w', new ItemStack(Blocks.WOOL, 1, i))
+						.build());
+			}
+
+		if(addBundledWireRecipe) {
+			GameRegistry.addRecipe(RecipeCharset.Builder.create(new RecipeResultWire(wireFactories[17], false, 1))
+					.shaped("sws", "www", "sws", 'w', new RecipeObjectSignalWire(WireType.INSULATED, false), 's', Items.STRING)
+					.build());
+			GameRegistry.addRecipe(RecipeCharset.Builder.create(new RecipeResultWire(wireFactories[17], true, 1))
+					.shaped("sws", "www", "sws", 'w', new RecipeObjectSignalWire(WireType.INSULATED, true), 's', Items.STRING)
 					.build());
 		}
-
-		GameRegistry.addRecipe(RecipeCharset.Builder.create(new RecipeResultWire(wireFactories[17], false, 1))
-				.shaped("sws", "www", "sws", 'w', new RecipeObjectSignalWire(WireType.INSULATED, false), 's', Items.STRING)
-				.build());
-		GameRegistry.addRecipe(RecipeCharset.Builder.create(new RecipeResultWire(wireFactories[17], true, 1))
-				.shaped("sws", "www", "sws", 'w', new RecipeObjectSignalWire(WireType.INSULATED, true), 's', Items.STRING)
-				.build());
 	}
 }
