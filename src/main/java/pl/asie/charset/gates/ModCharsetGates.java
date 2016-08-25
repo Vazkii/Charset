@@ -109,7 +109,7 @@ public class ModCharsetGates {
 		registerGateStack(ItemGate.getStack(new PartGateXOR().setInvertedSides(0b0001)), "wtw", "cwc", "scs");
 		registerGateStack(ItemGate.getStack(new PartGatePulseFormer()), "wcw", "cwc", "wws");
 		registerGateStack(ItemGate.getStack(new PartGateMultiplexer()), "wcw", "csc", "wcw");
-		registerGateStack(ItemGate.getStack(new PartGateRSLatch()), "scs", "wsw", "scs");
+		registerGateStack(ItemGate.getStack(new PartGateRSLatch())/*, "scs", "wsw", "scs"*/);
 		registerGateStack(ItemGate.getStack(new PartGateBuffer()));
 		registerGateStack(ItemGate.getStack(new PartGateBuffer().setInvertedSides(0b0001)));
 	}
