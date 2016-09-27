@@ -31,8 +31,6 @@ public abstract class ItemMinecartCharset extends ItemMinecart {
             if (!w.isRemote) {
                 placeCart(null, stack, w, pos);
             }
-
-            stack.stackSize--;
             return EnumActionResult.SUCCESS;
         }
     }

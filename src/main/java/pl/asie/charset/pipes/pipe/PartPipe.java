@@ -499,7 +499,7 @@ public class PartPipe extends Multipart implements IConnectable, ISlottedPart, I
 	}
 
 	protected void addItemClientSide(PipeItem item) {
-		if (getWorld() == null && !getWorld().isRemote) {
+		if (getWorld() == null || !getWorld().isRemote) {
 			return;
 		}
 
@@ -569,7 +569,7 @@ public class PartPipe extends Multipart implements IConnectable, ISlottedPart, I
 
 	@Override
 	public int injectItem(ItemStack stack, EnumFacing direction, boolean simulate) {
-		if (getWorld() == null && getWorld().isRemote || !connects(direction)) {
+		if (getWorld() == null || getWorld().isRemote || !connects(direction)) {
 			return 0;
 		}
 
