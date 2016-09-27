@@ -17,6 +17,7 @@
 package pl.asie.charset.storage.locking;
 
 import com.google.common.base.Predicate;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityHanging;
@@ -38,10 +39,12 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.ILockableContainer;
 import net.minecraft.world.LockCode;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import pl.asie.charset.api.storage.IKeyItem;
 import pl.asie.charset.storage.ModCharsetStorage;
 
-public class EntityLock extends EntityHanging {
+public class EntityLock extends EntityHanging implements IEntityAdditionalSpawnData {
     static final DataParameter<Integer> COLOR_0 = EntityDataManager.createKey(EntityLock.class, DataSerializers.VARINT);
     static final DataParameter<Integer> COLOR_1 = EntityDataManager.createKey(EntityLock.class, DataSerializers.VARINT);
 
@@ -326,4 +329,14 @@ public class EntityLock extends EntityHanging {
     public void playPlaceSound() {
 
     }
+
+	@Override
+	public void writeSpawnData(ByteBuf buffer) {
+		ByteBufUtils.writeUTF8String(buffer, facingDirection.getName());
+	}
+
+	@Override
+	public void readSpawnData(ByteBuf additionalData) {
+		facingDirection = EnumFacing.byName(ByteBufUtils.readUTF8String(additionalData));
+	}
 }
