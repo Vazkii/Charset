@@ -1,5 +1,6 @@
 package pl.asie.charset.lib.recipe;
 
+import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.BlankRecipeWrapper;
 import mezz.jei.api.recipe.IRecipeHandler;
 import mezz.jei.api.recipe.IRecipeWrapper;
@@ -78,6 +79,7 @@ public class JEIRecipeCharset extends BlankRecipeWrapper implements ICraftingRec
     }
 
     @Override
+    @Deprecated
     public List getInputs() {
         List<Object> mats = new ArrayList<Object>();
         for (IRecipeObject o : recipe.input) {
@@ -88,8 +90,19 @@ public class JEIRecipeCharset extends BlankRecipeWrapper implements ICraftingRec
     }
 
     @Override
+    @Deprecated
     public List<ItemStack> getOutputs() {
         Object o = recipe.output.preview();
         return o instanceof List ? (List<ItemStack>) o : (o instanceof ItemStack ? Collections.singletonList((ItemStack) o) : null);
     }
+
+	@Override
+	public void getIngredients(IIngredients ingredients) {
+		List<ItemStack> stacks = new ArrayList<ItemStack>();
+		for (IRecipeObject o : recipe.input) {
+            stacks.add((o != null && o.preview() != null) ? o.preview() instanceof ItemStack ? (ItemStack) o.preview() : null : null);
+        }
+		ingredients.setInputs(ItemStack.class, stacks);
+		ingredients.setOutput(ItemStack.class, (ItemStack) recipe.output.preview());
+	}
 }

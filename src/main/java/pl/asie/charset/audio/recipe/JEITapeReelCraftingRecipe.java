@@ -26,6 +26,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 
 import javax.annotation.Nonnull;
+
+import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.BlankRecipeWrapper;
 import mezz.jei.api.recipe.IRecipeHandler;
 import mezz.jei.api.recipe.IRecipeWrapper;
@@ -68,6 +70,7 @@ public class JEITapeReelCraftingRecipe extends BlankRecipeWrapper implements ISh
 
 	@Nonnull
 	@Override
+	@Deprecated
 	public List getInputs() {
 		Object[] inputs = new Object[9];
 
@@ -88,6 +91,7 @@ public class JEITapeReelCraftingRecipe extends BlankRecipeWrapper implements ISh
 
 	@Nonnull
 	@Override
+	@Deprecated
 	public List<ItemStack> getOutputs() {
 		return Collections.singletonList(new ItemStack(ModCharsetAudio.tapeReelItem, 1, OreDictionary.WILDCARD_VALUE));
 	}
@@ -102,4 +106,22 @@ public class JEITapeReelCraftingRecipe extends BlankRecipeWrapper implements ISh
 		return 3;
 	}
 
+	@Override
+	public void getIngredients(IIngredients ingredients) {
+		Object[] inputs = new Object[9];
+
+		List<Object> mats = new ArrayList<Object>();
+		mats.add(new ItemStack(ModCharsetAudio.magneticTapeItem));
+		mats.add(null);
+
+		for (int i = 0; i < 9; i++) {
+			if (i == 4) {
+				inputs[4] = new ItemStack(ModCharsetAudio.tapeReelItem, 1, OreDictionary.WILDCARD_VALUE);
+			} else {
+				inputs[i] = mats;
+			}
+		}
+		ingredients.setInputLists(ItemStack.class, JEIPluginCharsetAudio.jeiHelpers.getStackHelper().expandRecipeItemStackInputs(Arrays.asList(inputs)));
+		ingredients.setOutputs(ItemStack.class, JEIPluginCharsetAudio.jeiHelpers.getStackHelper().getSubtypes(new ItemStack(ModCharsetAudio.tapeReelItem, 1, OreDictionary.WILDCARD_VALUE)));
+	}
 }

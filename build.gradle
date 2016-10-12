@@ -31,12 +31,12 @@ repositories {
 }
 
 dependencies {
-	deobfCompile "MCMultiPart:MCMultiPart-experimental:1.2.0_73:universal"
-	deobfCompile "mezz.jei:jei_1.10:3.7.0.218"
+	deobfCompile "MCMultiPart:MCMultiPart-experimental:1.3.0_83:universal"
+	deobfCompile "mezz.jei:jei_1.10.2:3.12.7.312"
 }
 
 minecraft {
-	version = "1.10-12.18.0.1986-1.10.0"
+	version = "1.10.2-12.18.2.2099"
 
 	runDir = "run"
 	useDepAts = true
