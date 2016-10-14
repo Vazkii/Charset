@@ -20,15 +20,30 @@ import mezz.jei.api.*;
 
 import javax.annotation.Nonnull;
 
+import mezz.jei.api.ingredients.IModIngredientRegistration;
+
 @JEIPlugin
 public class JEIPluginCharsetAudio implements IModPlugin {
+	public static IJeiHelpers jeiHelpers;
+	
 	@Override
 	public void register(IModRegistry registry) {
+		jeiHelpers = registry.getJeiHelpers();
 		registry.addRecipeHandlers(new JEITapeCraftingRecipe.Handler(), new JEITapeReelCraftingRecipe.Handler());
 	}
 
 	@Override
 	public void onRuntimeAvailable(@Nonnull IJeiRuntime jeiRuntime) {
+
+	}
+
+	@Override
+	public void registerItemSubtypes(ISubtypeRegistry subtypeRegistry) {
+
+	}
+
+	@Override
+	public void registerIngredients(IModIngredientRegistration registry) {
 
 	}
 }
