@@ -106,6 +106,10 @@ public class PartWireNormal extends PartWireSignalBase implements IRedstoneEmitt
 
 	@Override
 	public void propagate(int color) {
+		if (getWorld() == null) {
+			return;
+		}
+		
 		if (DEBUG) {
 			System.out.println("--- PROPAGATE " + getPos().toString() + " " + location.name() + " (" + getWorld().getTotalWorldTime() + ") ---");
 		}
@@ -261,7 +265,7 @@ public class PartWireNormal extends PartWireSignalBase implements IRedstoneEmitt
 						}
 					} else if (getWireType() == WireType.NORMAL && facing.getOpposite() != location.facing) {
 						TileEntity nt = getWorld().getTileEntity(getPos().offset(facing));
-						if (!(nt instanceof IRedstoneReceiver)) {
+						if (nt != null && !(nt instanceof IRedstoneReceiver)) {
 							getWorld().notifyBlockOfStateChange(getPos().offset(facing), MCMultiPartMod.multipart);
 						}
 					}
@@ -281,7 +285,7 @@ public class PartWireNormal extends PartWireSignalBase implements IRedstoneEmitt
 							propagateNotifyCorner(location.facing, facing, getColor());
 						} else if (getWireType() == WireType.NORMAL && facing.getOpposite() != location.facing) {
 							TileEntity nt = getWorld().getTileEntity(getPos().offset(facing));
-							if (!(nt instanceof IRedstoneReceiver)) {
+							if (nt != null && !(nt instanceof IRedstoneReceiver)) {
 								getWorld().notifyBlockOfStateChange(getPos().offset(facing), MCMultiPartMod.multipart);
 							}
 						}
