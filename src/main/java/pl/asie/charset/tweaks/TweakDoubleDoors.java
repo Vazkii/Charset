@@ -62,12 +62,11 @@ public class TweakDoubleDoors extends Tweak {
 
 	@Override
 	public boolean init() {
-		allowedDoors.add((BlockDoor) Blocks.ACACIA_DOOR);
-		allowedDoors.add((BlockDoor) Blocks.BIRCH_DOOR);
-		allowedDoors.add((BlockDoor) Blocks.JUNGLE_DOOR);
-		allowedDoors.add((BlockDoor) Blocks.OAK_DOOR);
-		allowedDoors.add((BlockDoor) Blocks.SPRUCE_DOOR);
-		allowedDoors.add((BlockDoor) Blocks.DARK_OAK_DOOR);
+		for (Block block : Block.REGISTRY) {
+			if (block != null && block instanceof BlockDoor) {
+				allowedDoors.add((BlockDoor) block);
+			}
+		}
 		return true;
 	}
 
